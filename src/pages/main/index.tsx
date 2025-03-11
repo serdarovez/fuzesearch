@@ -1,5 +1,4 @@
-import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import { useState } from "react";
 import { useProducts } from "../../hooks/useProduct";
 
 export default function MainIndex() {
@@ -54,7 +53,7 @@ export default function MainIndex() {
 
       {/* Products Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-        {sortedProducts.map((product) => (
+        {sortedProducts.map((product: any) => (
           <div
             key={product.id}
             className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300"

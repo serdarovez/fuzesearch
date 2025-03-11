@@ -3,7 +3,7 @@ import { useProducts } from "../../hooks/useProduct";
 
 // Interface for Product structure to match your existing code
 interface Product {
-  id: string;
+  id?: string;
   name: string;
   price: number;
   description: string;
@@ -12,8 +12,7 @@ interface Product {
 
 export default function SecondAdmin() {
   // Use your existing hook
-  const { products, addProduct, updateProduct, deleteProduct } =
-    useProducts("second");
+  const { products, addProduct, deleteProduct } = useProducts("second");
 
   // Form state
   const [name, setName] = useState("");
@@ -26,10 +25,12 @@ export default function SecondAdmin() {
 
   // Load saved products from localStorage on component mount
   useEffect(() => {
+    console.log(image);
     const savedProducts = localStorage.getItem("products");
     if (savedProducts) {
       try {
         const parsedProducts = JSON.parse(savedProducts);
+        console.log(parsedProducts);
         // Update the products state with the saved products
         // Assuming your useProducts hook has a way to set the products
         // If not, you might need to modify the hook or handle it differently
@@ -76,13 +77,11 @@ export default function SecondAdmin() {
     const addedProduct = addProduct(newProduct);
 
     // Save product to localStorage
-    if (addedProduct) {
-      const savedProducts = JSON.parse(
-        localStorage.getItem("products") || "[]"
-      );
-      savedProducts.push(addedProduct);
-      localStorage.setItem("products", JSON.stringify(savedProducts));
-    }
+    // if (addedProduct) {
+    const savedProducts = JSON.parse(localStorage.getItem("products") || "[]");
+    savedProducts.push(addedProduct);
+    localStorage.setItem("products", JSON.stringify(savedProducts));
+    // }
 
     // Reset form - using your existing pattern
     setName("");
@@ -225,7 +224,7 @@ export default function SecondAdmin() {
             <p className="text-gray-500 italic">No products available</p>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {products.map((product) => (
+              {products.map((product: any) => (
                 <div
                   key={product.id}
                   className="border border-gray-200 rounded-md p-4 hover:shadow-md transition-shadow"

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { useProducts } from "../../hooks/useProduct";
 import Fuse from "fuse.js"; // Import Fuse.js
 
@@ -25,7 +25,7 @@ export default function Search() {
     .map((result) => result.item) // Extract the product from Fuse.js result
     .sort((a, b) => a.price - b.price); // Sort by price
 
-  const cheapestProduct = filteredProducts[0];
+  const cheapestProduct: any = filteredProducts[0];
 
   return (
     <div className="min-h-screen bg-gray-100 py-8 px-4 sm:px-6 lg:px-8">
