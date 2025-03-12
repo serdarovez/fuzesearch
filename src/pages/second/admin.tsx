@@ -66,7 +66,7 @@ export default function SecondAdmin() {
     e.preventDefault();
 
     // Create new product using your existing pattern
-    const newProduct: Product = {
+    const newProduct: any = {
       name,
       price: Number(price),
       description,
