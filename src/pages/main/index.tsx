@@ -60,11 +60,11 @@ export default function MainIndex() {
           >
             {/* Product Image (if available) */}
             {product.image && (
-              <div className="w-full h-48 overflow-hidden">
+              <div className="w-full aspect-square overflow-hidden">
                 <img
                   src={product.image}
                   alt={product.name}
-                  className="w-full h-full object-cover"
+                  className="w-full h-full object-contain"
                 />
               </div>
             )}
@@ -75,7 +75,7 @@ export default function MainIndex() {
                 {product.name}
               </h3>
               <p className="text-lg font-bold text-green-600 mb-2">
-                ${product.price.toFixed(2)}
+                {product.price.toFixed(2)} TMT
               </p>
               <p className="text-sm text-gray-600 line-clamp-3">
                 {product.description}

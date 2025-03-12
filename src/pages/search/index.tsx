@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useProducts } from "../../hooks/useProduct";
 import Fuse from "fuse.js"; // Import Fuse.js
+import { Link } from "react-router-dom"; // Import Link for navigation
 
 export default function Search() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -25,7 +26,17 @@ export default function Search() {
     .map((result) => result.item) // Extract the product from Fuse.js result
     .sort((a, b) => a.price - b.price); // Sort by price
 
-  const cheapestProduct: any = filteredProducts[0];
+  // Filter products to display only the cheapest one for each name
+  const uniqueProducts = filteredProducts.reduce((acc: any, product) => {
+    // Check if the product name already exists in the accumulator
+    if (!acc[product.name] || acc[product.name].price > product.price) {
+      acc[product.name] = product; // Store the cheapest product for each name
+    }
+    return acc;
+  }, {});
+
+  // Convert the unique products object back to an array
+  const uniqueProductsArray = Object.values(uniqueProducts);
 
   return (
     <div className="min-h-screen bg-gray-100 py-8 px-4 sm:px-6 lg:px-8">
@@ -44,18 +55,22 @@ export default function Search() {
             className="w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
         </div>
-        <div className="grid grid-cols-3 gap-10">
-          {/* Search Results */}
-          {searchQuery && (
-            <div>
-              {cheapestProduct ? (
-                <div className="bg-white rounded-lg shadow-md overflow-hidden">
+
+        {/* Search Results */}
+        {searchQuery && (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {uniqueProductsArray.length > 0 ? (
+              uniqueProductsArray.map((product: any) => (
+                <div
+                  key={product.id}
+                  className="bg-white rounded-lg shadow-md overflow-hidden"
+                >
                   {/* Product Image (if available) */}
-                  {cheapestProduct.image && (
-                    <div className="w-full h-48 overflow-hidden">
+                  {product.image && (
+                    <div className="w-full aspect-square overflow-hidden">
                       <img
-                        src={cheapestProduct.image}
-                        alt={cheapestProduct.name}
+                        src={product.image}
+                        alt={product.name}
                         className="w-full h-full object-cover"
                       />
                     </div>
@@ -64,24 +79,32 @@ export default function Search() {
                   {/* Product Details */}
                   <div className="p-4">
                     <h3 className="text-xl font-semibold text-gray-800 mb-2">
-                      {cheapestProduct.name}
+                      {product.name}
                     </h3>
                     <p className="text-lg font-bold text-green-600 mb-2">
-                      ${cheapestProduct.price.toFixed(2)}
+                      ${product.price.toFixed(2)}
                     </p>
-                    <p className="text-sm text-gray-600">
-                      {cheapestProduct.description}
+                    <p className="text-sm text-gray-600 mb-4">
+                      {product.description}
                     </p>
+
+                    {/* Link Button */}
+                    <Link
+                      to={`${product.position}`} // Adjust the route based on your product source
+                      className="w-full inline-block text-center bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 transition-colors"
+                    >
+                      View Product
+                    </Link>
                   </div>
                 </div>
-              ) : (
-                <p className="text-gray-500 italic">
-                  No matching products found.
-                </p>
-              )}
-            </div>
-          )}
-        </div>
+              ))
+            ) : (
+              <p className="text-gray-500 italic">
+                No matching products found.
+              </p>
+            )}
+          </div>
+        )}
       </div>
     </div>
   );
