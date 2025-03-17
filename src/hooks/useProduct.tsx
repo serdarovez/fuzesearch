@@ -25,15 +25,18 @@ export function useProducts(site: "main" | "second") {
     let mainProducts = localStorage.getItem("main_products");
     let secondProducts = localStorage.getItem("second_products");
 
+    // Parse the products or initialize as empty arrays
     let parsedMainProducts = mainProducts ? JSON.parse(mainProducts) : [];
     let parsedSecondProducts = secondProducts ? JSON.parse(secondProducts) : [];
 
+    // If either main or second products are empty, initialize both from DUMMY_PRODUCTS
     if (parsedMainProducts.length === 0 || parsedSecondProducts.length === 0) {
       parsedMainProducts = DUMMY_PRODUCTS.filter((p) => p.position === "main");
       parsedSecondProducts = DUMMY_PRODUCTS.filter(
         (p) => p.position === "second"
       );
 
+      // Save the initialized products to localStorage
       localStorage.setItem("main_products", JSON.stringify(parsedMainProducts));
       localStorage.setItem(
         "second_products",
@@ -41,6 +44,7 @@ export function useProducts(site: "main" | "second") {
       );
     }
 
+    // Return all products (main + second)
     return [...parsedMainProducts, ...parsedSecondProducts];
   };
 
