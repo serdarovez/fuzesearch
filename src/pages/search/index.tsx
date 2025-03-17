@@ -95,7 +95,7 @@ export default function Search() {
 
                   {/* Link Button */}
                   <Link
-                    to={`${product.position}`} // Adjust the route based on your product source
+                    to={`${product.position}/${product.id}`} // Adjust the route based on your product source
                     className="w-full inline-block text-center bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 transition-colors"
                   >
                     View Product

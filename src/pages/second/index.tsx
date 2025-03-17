@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useProducts } from "../../hooks/useProduct";
+import { Link } from "react-router-dom";
 
 export default function Second() {
   const { products } = useProducts("second");
@@ -80,6 +81,12 @@ export default function Second() {
               <p className="text-sm text-gray-600 line-clamp-3">
                 {product.description}
               </p>
+              <Link
+                to={`/second/${product.id}`}
+                className="mt-4 inline-block px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors duration-300"
+              >
+                View Details
+              </Link>
             </div>
           </div>
         ))}
