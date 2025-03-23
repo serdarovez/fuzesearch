@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import DUMMY_PRODUCTS from "../assets/dummyproducts";
 
 export interface Product {
