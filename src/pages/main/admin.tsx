@@ -207,7 +207,7 @@ export default function MainAdmin() {
                   htmlFor="price"
                   className="block text-sm font-medium text-gray-700 mb-1"
                 >
-                  Price ($)
+                  Price TMT
                 </label>
                 <input
                   id="price"
@@ -320,7 +320,7 @@ export default function MainAdmin() {
                   {/* Product Details */}
                   <h3 className="font-medium text-lg">{product.name}</h3>
                   <p className="text-green-600 font-bold">
-                    ${product.price.toFixed(2)}
+                    {product.price.toFixed(2)} TMT
                   </p>
                   <p
                     className="text-gray-600 text-sm mt-1 overflow-hidden"
