@@ -5,7 +5,7 @@ import { Link } from "react-router-dom"; // Import Link for navigation
 
 export default function Search() {
   const [searchQuery, setSearchQuery] = useState("");
-  const { allProducts } = useProducts("main"); // Use 'main' or 'second' based on your requirement
+  const { allProducts } = useProducts("all"); // Use 'main' or 'second' based on your requirement
 
   // Configure Fuse.js options
   const fuseOptions = {
@@ -16,18 +16,18 @@ export default function Search() {
   };
 
   // Initialize Fuse.js with the products and options
-  const fuse = new Fuse(allProducts, fuseOptions);
+  const fuse = new Fuse(allProducts || [], fuseOptions);
 
   // Perform fuzzy search
   const fuzzyResults = searchQuery ? fuse.search(searchQuery) : [];
 
-  // Extract the matched products and sort them by price
-  const filteredProducts = fuzzyResults
-    .map((result) => result.item) // Extract the product from Fuse.js result
-    .sort((a, b) => a.price - b.price); // Sort by price
+  // Extract the matched products
+  const filteredProducts = fuzzyResults.map((result) => result.item);
 
   // Filter products to display only the cheapest one for each name
-  const uniqueProducts = filteredProducts.reduce((acc: any, product) => {
+  const uniqueProducts = (
+    searchQuery ? filteredProducts : allProducts || []
+  ).reduce((acc: Record<string, any>, product) => {
     // Check if the product name already exists in the accumulator
     if (!acc[product.name] || acc[product.name].price > product.price) {
       acc[product.name] = product; // Store the cheapest product for each name
@@ -35,11 +35,10 @@ export default function Search() {
     return acc;
   }, {});
 
-  // Convert the unique products object back to an array
-  const uniqueProductsArray = Object.values(uniqueProducts);
-
-  // Determine which products to display
-  const productsToDisplay = searchQuery ? uniqueProductsArray : allProducts;
+  // Convert the unique products object back to an array and sort by price
+  const productsToDisplay = Object.values(uniqueProducts).sort(
+    (a: any, b: any) => a.price - b.price
+  );
 
   return (
     <div className="min-h-screen bg-gray-100 py-8 px-4 sm:px-6 lg:px-8">
@@ -84,18 +83,19 @@ export default function Search() {
                     {product.name}
                   </h3>
                   <p className="text-lg font-bold text-green-600 mb-2">
-                    ${product.price.toFixed(2)}
+                    {product.price.toFixed(2)} TMT
                   </p>
                   <p className="text-sm text-gray-600 mb-2">
                     {product.description}
                   </p>
                   <p className="text-sm text-red-500 mb-4">
-                     <span>From </span> "{product.position === 'main' ? 'Site 1' : 'Site 2'}"
+                    <span>From </span> "
+                    {product.position === "main" ? "Site 1" : "Site 2"}"
                   </p>
 
                   {/* Link Button */}
                   <Link
-                    to={`${product.position}/${product.id}`} // Adjust the route based on your product source
+                    to={`/${product.position}/${product.id}`} // Added leading slash
                     className="w-full inline-block text-center bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 transition-colors"
                   >
                     View Product

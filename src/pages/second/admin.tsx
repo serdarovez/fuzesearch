@@ -3,7 +3,7 @@ import { useProducts } from "../../hooks/useProduct";
 
 // Interface for Product structure to match your existing code
 interface Product {
-  id?: string;
+  id?: number;
   name: string;
   price: number;
   description: string;
@@ -12,12 +12,19 @@ interface Product {
 
 export default function SecondAdmin() {
   // Use your existing hook
-  const { products, addProduct, deleteProduct } = useProducts("second");
+  const { products, addProduct, deleteProduct, updateProduct } =
+    useProducts("second");
 
   // Form state
   const [name, setName] = useState("");
   const [price, setPrice] = useState("");
   const [description, setDescription] = useState("");
+
+  // Edit mode state
+  const [isEditing, setIsEditing] = useState(false);
+  const [editingProductId, setEditingProductId] = useState<number | undefined>(
+    undefined
+  );
 
   // Image handling state
   const [image, setImage] = useState<File | null>(null);
@@ -31,6 +38,7 @@ export default function SecondAdmin() {
       try {
         const parsedProducts = JSON.parse(savedProducts);
         console.log(parsedProducts);
+
         // Update the products state with the saved products
         // Assuming your useProducts hook has a way to set the products
         // If not, you might need to modify the hook or handle it differently
@@ -65,34 +73,91 @@ export default function SecondAdmin() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
-    // Create new product using your existing pattern
-    const newProduct: any = {
-      name,
-      price: Number(price),
-      description,
-      image: imagePreview || undefined, // Add image data to the product
-    };
+    if (isEditing && editingProductId) {
+      // Update existing product
+      const updatedProduct: any = {
+        id: editingProductId,
+        name,
+        price: Number(price),
+        description,
+        image: imagePreview || undefined, // Keep existing image if not changed
+      };
 
-    // Add product using your hook
-    const addedProduct = addProduct(newProduct);
+      // Update product using your hook
+      const updatedProductResult = updateProduct(
+        editingProductId,
+        updatedProduct
+      );
 
-    // Save product to localStorage
-    // if (addedProduct) {
-    const savedProducts = JSON.parse(localStorage.getItem("products") || "[]");
-    savedProducts.push(addedProduct);
-    localStorage.setItem("products", JSON.stringify(savedProducts));
-    // }
+      // Update product in localStorage
+      const savedProducts = JSON.parse(
+        localStorage.getItem("products") || "[]"
+      );
+      const updatedSavedProducts = savedProducts.map((product: Product) =>
+        product.id == editingProductId ? updatedProductResult : product
+      );
+      localStorage.setItem("products", JSON.stringify(updatedSavedProducts));
+
+      // Exit edit mode
+      setIsEditing(false);
+      setEditingProductId(undefined);
+    } else {
+      // Create new product using your existing pattern
+      const newProduct: any = {
+        name,
+        price: Number(price),
+        description,
+        image: imagePreview || undefined, // Add image data to the product
+      };
+
+      // Add product using your hook
+      const addedProduct = addProduct(newProduct);
+
+      // Save product to localStorage
+      // if (addedProduct) {
+      const savedProducts = JSON.parse(
+        localStorage.getItem("products") || "[]"
+      );
+      savedProducts.push(addedProduct);
+      localStorage.setItem("products", JSON.stringify(savedProducts));
+      // }
+    }
 
     // Reset form - using your existing pattern
+    resetForm();
+  };
+
+  // Reset form function
+  const resetForm = () => {
     setName("");
     setPrice("");
     setDescription("");
     setImage(null);
     setImagePreview(null);
+    setIsEditing(false);
+    setEditingProductId(undefined);
+  };
+
+  // Cancel edit
+  const handleCancelEdit = () => {
+    resetForm();
+  };
+
+  // Start editing a product
+  const handleEditProduct = (product: any) => {
+    setIsEditing(true);
+    setEditingProductId(product.id);
+    setName(product.name);
+    setPrice(product.price.toString());
+    setDescription(product.description);
+    setImagePreview(product.image || null);
+
+    // Scroll to the form
+    window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   // Extended delete handler to also remove products from localStorage
-  const handleDeleteProduct = (id: string) => {
+  const handleDeleteProduct = (id: number) => {
     // Call your existing delete function
     deleteProduct(id);
 
@@ -114,7 +179,7 @@ export default function SecondAdmin() {
         {/* Product Form */}
         <div className="bg-white p-6 rounded-lg shadow-md mb-8">
           <h2 className="text-xl font-semibold text-gray-700 mb-4">
-            Add New Product
+            {isEditing ? "Edit Product" : "Add New Product"}
           </h2>
 
           <form onSubmit={handleSubmit} className="space-y-4">
@@ -150,7 +215,8 @@ export default function SecondAdmin() {
                   value={price}
                   onChange={(e) => setPrice(e.target.value)}
                   required
-                  className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                  onWheel={(e: any) => e.target.blur()}
+                  className="w-full px-4 remove-spinners py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:outline-none"
                 />
               </div>
             </div>
@@ -202,14 +268,25 @@ export default function SecondAdmin() {
               )}
             </div>
 
-            {/* Submit Button */}
-            <div>
+            {/* Form Buttons */}
+            <div className="flex gap-3">
               <button
                 type="submit"
                 className="px-6 py-2 bg-blue-600 text-white font-medium rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors"
               >
-                Add Product
+                {isEditing ? "Update Product" : "Add Product"}
               </button>
+
+              {/* Cancel Button (only show in edit mode) */}
+              {isEditing && (
+                <button
+                  type="button"
+                  onClick={handleCancelEdit}
+                  className="px-6 py-2 bg-gray-500 text-white font-medium rounded-md hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition-colors"
+                >
+                  Cancel
+                </button>
+              )}
             </div>
           </form>
         </div>
@@ -256,11 +333,20 @@ export default function SecondAdmin() {
                     {product.description}
                   </p>
 
-                  {/* Delete Button */}
-                  <div className="mt-3 flex justify-end">
+                  {/* Action Buttons */}
+                  <div className="mt-3 flex justify-end space-x-2">
+                    {/* Edit Button */}
+                    <button
+                      onClick={() => handleEditProduct(product)}
+                      className="px-3 py-1 bg-amber-500 text-white text-sm rounded-md hover:bg-amber-600 focus:outline-none focus:ring-2 focus:ring-amber-500 transition-colors"
+                    >
+                      Edit
+                    </button>
+
+                    {/* Delete Button */}
                     <button
                       onClick={() => handleDeleteProduct(product.id)}
-                      className="px-3 py-1 bg-[red] text-white text-sm rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 transition-colors"
+                      className="px-3 py-1 bg-red-600 text-white text-sm rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 transition-colors"
                     >
                       Delete
                     </button>

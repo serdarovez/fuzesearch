@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import DUMMY_PRODUCTS from "../assets/dummyproducts";
 
 export interface Product {
-  id: string;
+  id: number;
   name: string;
   price: number;
   description: string;
@@ -10,7 +10,7 @@ export interface Product {
   position: "main" | "second";
 }
 
-export function useProducts(site: "main" | "second") {
+export function useProducts(site: "main" | "second" | "all") {
   // Initialize state from localStorage or dummy data if empty
   const getInitialProducts = () => {
     const storedProducts = localStorage.getItem(`${site}_products`);
@@ -30,11 +30,13 @@ export function useProducts(site: "main" | "second") {
     let parsedSecondProducts = secondProducts ? JSON.parse(secondProducts) : [];
 
     // If either main or second products are empty, initialize both from DUMMY_PRODUCTS
-    if (parsedMainProducts.length === 0 || parsedSecondProducts.length === 0) {
+    if (parsedMainProducts.length === 0 && parsedSecondProducts.length === 0) {
       parsedMainProducts = DUMMY_PRODUCTS.filter((p) => p.position === "main");
       parsedSecondProducts = DUMMY_PRODUCTS.filter(
         (p) => p.position === "second"
       );
+
+      console.log("products", parsedMainProducts, parsedSecondProducts);
 
       // Save the initialized products to localStorage
       localStorage.setItem("main_products", JSON.stringify(parsedMainProducts));
@@ -49,26 +51,26 @@ export function useProducts(site: "main" | "second") {
   };
 
   // Persist changes to localStorage
-  useEffect(() => {
-    localStorage.setItem(`${site}_products`, JSON.stringify(products));
-  }, [products, site]);
+  // useEffect(() => {
+  //   localStorage.setItem(`${site}_products`, JSON.stringify(products));
+  // }, [products, site]);
 
   const addProduct = (product: Omit<Product, "id">) => {
-    const newProduct = { ...product, id: Date.now().toString() };
+    const newProduct = { ...product, id: Date.now() };
     const updatedProducts = [...products, newProduct];
     setProducts(updatedProducts);
     localStorage.setItem(`${site}_products`, JSON.stringify(updatedProducts));
   };
 
-  const updateProduct = (id: string, updatedProduct: Partial<Product>) => {
+  const updateProduct = (id: number, updatedProduct: Partial<Product>) => {
     const updatedProducts = products.map((product) =>
-      product.id === id ? { ...product, ...updatedProduct } : product
+      product.id == id ? { ...product, ...updatedProduct } : product
     );
     setProducts(updatedProducts);
     localStorage.setItem(`${site}_products`, JSON.stringify(updatedProducts));
   };
 
-  const deleteProduct = (id: string) => {
+  const deleteProduct = (id: number) => {
     const updatedProducts = products.filter((product) => product.id !== id);
     setProducts(updatedProducts);
     localStorage.setItem(`${site}_products`, JSON.stringify(updatedProducts));
